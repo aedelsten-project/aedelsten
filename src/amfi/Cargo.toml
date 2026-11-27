@@ -1,0 +1,15 @@
+[package]
+name = "amfi"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+arrays = { path = "../arrays" }
+basis = { path = "../basis" }
+eri = { path = "../eri" }
+mmd = { path = "../mmd" }
+
+[dev-dependencies]
+oneint = { path = "../oneint" }

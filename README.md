@@ -1,93 +1,184 @@
-# Ädelsten-devel
+# Ädelsten
 
+Ädelsten is a library of molecular integrals over Gaussian basis functions, written in Rust and callable from Rust, C,
+Fortran, Python and Julia. It computes the integrals and the single operations built directly on them; a host program
+(an SCF, a multiconfigurational or perturbation-theory code) assembles its Fock matrices, Hamiltonians and energies
+from them.
 
+- **One-electron integrals:** overlap, kinetic energy, the potentials of point and finite (Gaussian) nuclei, moments,
+  linear and angular momentum, electric fields at sites; over contracted (general or segmented) or primitive bases,
+  Cartesian or spherical.
+- **Two-electron integrals:** the stored tensor, and integral-direct J and K builds (restricted, unrestricted, for
+  densities of any symmetry, for several densities in one walk, the active-space integrals of a CASSCF, the
+  half-transformed integrals of a perturbation theory), full-range and range-separated (erf and erfc), with Schwarz
+  screening.
+- **Geometric first derivatives** of the one- and two-electron integrals, contracted with densities, with frozen
+  centres.
+- **Relativity:** the spin-free exact two-component (X2C) one-electron Hamiltonian and the picture change of other
+  operators; spin-orbit integrals, one-electron and the atomic mean-field (AMFI) two-electron term.
+- **Embedding:** external point multipoles of any order, ab initio model potentials (AIMPs) for cores and for an
+  environment, and polarizable sites (induced dipoles, with Thole damping).
+- **Point-group symmetry** of the molecule and its operations on matrices and orbitals.
+- **MPI:** every computation can split its work over the ranks of a communicator the host gives it.
+- **Reporting:** the memory each part of a context holds, timings of the library's own work, and the list of
+  references for the methods a run used.
 
-## Getting started
+## Building
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+Ädelsten needs **Rust 1.88 or newer** and a **BLAS and LAPACK with 32-bit (LP64) integers**:
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/aedelsten/aedelsten-devel.git
-git branch -M main
-git push -uf origin main
+cargo build --release
 ```
 
-## Integrate with your tools
+The BLAS is a build-time choice: Accelerate on macOS and the system BLAS elsewhere by default, or one of the features
+`openblas` (found through `OPENBLASROOT` or pkg-config), `mkl` (through `MKLROOT`) or `system-blas`. Further features:
 
-* [Set up project integrations](https://gitlab.com/aedelsten/aedelsten-devel/-/settings/integrations)
+| Feature | Effect |
+|---|---|
+| `mpi` | The work of each computation split over the ranks of a communicator (needs an MPI installation). |
+| `unchecked-arrays` | Array accesses without bounds checks: faster, for production builds once a build has run checked. |
+| `profile` | The fine-grained timings (per batch of integrals) as well as the coarse ones. |
 
-## Collaborate with your team
+The build generates code for the CPU it runs on (`.cargo/config.toml`), so a binary runs on that type of CPU only:
+build on the machine, or a node of the partition, that runs it. A `RUSTFLAGS` in the environment replaces this.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Installing for C, Fortran, Python and Julia
 
-## Test and Deploy
+After `cargo build --release`, choose where the files go and install them with `--release`, so that the release build
+is the one copied:
 
-Use the built-in continuous integration in GitLab.
+```
+export PREFIX=/path/to/install
+cargo install-aedelsten install --release            # PREFIX/lib/libaedelsten.{dylib,so}, PREFIX/include/aedelsten.h,
+                                                     # PREFIX/share/aedelsten/basis
+cargo install-aedelsten install-python               # PREFIX/lib/python/aedelsten.py
+cargo install-aedelsten install-julia                # the first JULIA_DEPOT_PATH entry as a package, else PREFIX/lib/julia
+cargo install-aedelsten install-fortran --release    # PREFIX/lib/Aedelsten.o, PREFIX/include/aedelsten.mod
+```
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+- **C:** include `aedelsten.h` and link `libaedelsten`. Every function is documented in the header.
+- **Python** (3.10 or newer, with numpy) and **Julia** load the library at run time: set `AEDELSTEN_LIB` to its full
+  path, or put its directory on `DYLD_LIBRARY_PATH` (macOS) or `LD_LIBRARY_PATH` (Linux). For Python, put
+  `PREFIX/lib/python` on `PYTHONPATH`.
+- **Fortran:** the module is compiled by `FC` (else the first of gfortran, ifx, ifort, nvfortran and flang that runs)
+  with gfortran's preprocessor flag `-cpp`; another compiler may need its own spelling. A module file can be read only
+  by the compiler that wrote it, so compile the module with the compiler of your program. With `--int64` the
+  module's default integer is 64-bit, for programs compiled with 64-bit default integers. Link a program as
+  ```
+  gfortran -I$PREFIX/include program.f90 $PREFIX/lib/Aedelsten.o $PREFIX/lib/libaedelsten.dylib
+  ```
+  (on macOS, gfortran may need `SDKROOT=$(xcrun --show-sdk-path)`).
 
-***
+`examples/python`, `examples/julia` and `examples/fortran` hold a demonstration program of each area in each language;
+each says at its top how to run it.
 
-# Editing this README
+## Using the library
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+A computation goes through a **context**, made from an input file that gives the basis sets and the centres. The
+context derives what the integrals need when asked to (`set_shell_pairs`, `set_eri_data`, ...) and keeps it until it
+is freed (`free_*`); `memory_breakdown` reports what it holds. Every computation takes its temporary memory from a
+**scratch** buffer that the caller sizes once (`set_scratch`); `scratch_bytes` gives the size the chosen operations
+need, from the input alone. Results go into the caller's arrays, column-major.
 
-## Suggestions for a good README
+**Basis sets** are read in the Molcas basis-library format. Take them from the Basis Set Exchange in that format, so
+that a calculation can be reproduced: a file is looked for in the working directory, then in the directories of
+`AEDELSTEN_BASIS_LIBRARY` (separated as in `PATH`), then in the bundled library. The bundled files (`src/basis/data`,
+installed to `PREFIX/share/aedelsten/basis`, which an installed library finds from its own location; the source tree's
+copy after it) serve the library's tests and its own uses (the reference orbitals of the model Fockian and of AMFI).
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+**Under MPI** the host passes its communicator when it makes the context, as a Fortran handle from C, Fortran, Python
+and Julia; a host without MPI of its own can initialize it through the library (`aedelsten_mpi_init_c`).
 
-## Name
-Choose a self-explaining name for your project.
+## Versions, and depending on Ädelsten from Rust
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Every crate of the workspace (`aedelsten` and its foundation crates `arrays`, `aedelsten_mpi`, `instrumentation`,
+`constants`) carries the one version of the workspace, and a release is tagged `v<version>`. A Rust program depends
+on a release through its tag, naming each crate it uses:
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+```toml
+[dependencies]
+aedelsten = { git = "<Ädelsten's release repository>", tag = "v0.5.0", version = "0.5" }
+arrays = { git = "<Ädelsten's release repository>", tag = "v0.5.0", version = "0.5" }
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+The tag fixes the release built against (and `Cargo.lock` its commit); the version requirement makes Cargo refuse a
+source whose version does not match, which also holds when the dependency is a `path` to a local checkout. At run time
+`aedelsten::get_version()` gives the version and `aedelsten::get_source_commit()` the git commit the library was built
+from (`None` for a source tree that was no git checkout); from C `aedelsten_get_version_c` and
+`aedelsten_get_source_commit_c`, from Python, Julia and Fortran `aedelsten_get_version` and
+`aedelsten_get_source_commit`.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### What a version number promises
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Ädelsten follows [Semantic Versioning 2.0.0](https://semver.org). The interfaces it versions strictly are the Rust
+API (what the `aedelsten` crate exports), the C interface (its entry points and `include/aedelsten.h`) and the file
+formats it reads (basis and AIMP libraries, inputs, xfields):
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+- a **major** release for any change an existing program can notice as a break: a function or C entry point removed
+  or renamed, a signature, an argument's order, type or meaning changed, a default changed so that results change, a
+  file accepted before now refused;
+- a **minor** release for additions that leave every existing call compiling and behaving as before;
+- a **patch** release for fixes that change no public signature or meaning.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Every release is checked against the previous one before it is published (`cargo semver-checks` for the Rust API, a
+diff of the header for the C interface), and its number set by the largest change found.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+**Before 1.0.0** (versions 0.y.z, as this one) the interfaces are still settling: a minor release may break them, each
+break listed in the release's notes.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**The Fortran, Python and Julia interfaces are exempt from the strict promise.** They are convenience layers over the
+C interface, written so that those languages need no glue of their own; anyone can write a different one over the C
+interface, which is the stable contract. They carry the library's version and gain each new function with the C
+interface, but their own conventions (names, keyword arguments, return types, error handling) may change in a minor
+release, so that they can follow what is idiomatic in each language. Every such change is listed in the release's
+notes, and none comes in a patch release. A change underneath them, in the C interface, is a major release anyway.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Releases, bug reports and contributions
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This repository holds released versions of Ädelsten only; it lives on GitLab and is mirrored to GitHub. Development is
+internal: each release is an export of the development tree at its tag, without the history between releases.
 
-## License
-For open source projects, say how it is licensed.
+Ädelsten is provided as is, without warranty of any kind, including as to the accuracy or correctness of its results
+(see [LICENSE](LICENSE)). Check results that matter against independent references.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Bug reports are welcome, as issues on GitLab, at <https://gitlab.com/aedelsten/aedelsten/-/issues> (also for the GitHub
+mirror): the version and source commit (above), the input, and what went wrong. Issues are the only channel for reports
+and questions.
+
+The project is not looking for collaborators. If you want to add code to it, open an issue first, with a clear plan of
+what you want to add and why it belongs in Ädelsten. Otherwise, fork a release and develop it on your own, under the
+terms of its licence.
+
+What changed in each release is in [CHANGELOG.md](CHANGELOG.md).
+
+## Citing Ädelsten
+
+If you use results computed with Ädelsten, please cite the software: [CITATION.bib](CITATION.bib) has the entry.
+Each release is archived on Zenodo, with a DOI of its own and a concept DOI that always points to the latest release.
+The library also gives the host program the references for the methods a run used, to list with its output.
+
+## Credits
+
+Ernst D. Larsson wrote the library, its design, implementation and validation, from summer 2024 to summer 2026.
+Since then he has directed the work, with Claude (Anthropic) writing most of the code.
+
+The point-group symmetry uses libmsym (Marcus Johansson), vendored in `src/symmetry/src/libmsym`.
+
+## Licence
+
+MIT, see [LICENSE](LICENSE). Every file's licence is declared in REUSE format (SPDX headers and
+[REUSE.toml](REUSE.toml)); check with `reuse lint`.
+
+Some files in the repository are not this library's own and keep their own licences:
+
+- libmsym (`src/symmetry/src/libmsym`): MIT, Copyright (c) 2015 Marcus Johansson.
+- The STO-3G, cc-pVDZ, x2c-SVPall and x2c-QZVPPall basis sets in `src/basis/data`: from the Basis Set Exchange, BSD 3-Clause.
+- The ANO-RCC basis library and its shorthand contractions (`ANO-RCC.aliases`, from `basis.tbl`) in `src/basis/data`:
+  from OpenMolcas, LGPL 2.1. No embedding AIMPs are bundled; the tests' (`test_fixtures/basis/TEST-EMB-AIMP`) are
+  MgO's from a self-consistent embedded ion (SCEI) calculation by E. D. Larsson, MIT.
+- `test_fixtures/pehf_1pa`: converted from Dalton's `pehf_1pa` test, LGPL 2.1.
+
+The licence texts are in [LICENSES](LICENSES). The libraries this library is built against keep their own licences:
+the BLAS and LAPACK chosen at build time (Accelerate, OpenBLAS or Intel MKL) and, with the `mpi` feature, the MPI
+implementation. cbindgen and cc are used at build time only.

@@ -1,0 +1,21 @@
+[package]
+name = "aimp"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+aedelsten_mpi = { path = "../aedelsten_mpi" }
+arrays   = { path = "../arrays" }
+basis   = { path = "../basis" }
+cart2sph   = { path = "../cart2sph" }
+eri   = { path = "../eri" }
+fock_constructors   = { path = "../fock_constructors" }
+instrumentation   = { path = "../instrumentation" }
+oneint   = { path = "../oneint" }
+
+[features]
+# Forwarded straight through to aedelsten_mpi: off by default (pure Rust, no MPI
+# toolchain required), and compiles/links real MPI when enabled.
+mpi = ["aedelsten_mpi/mpi"]

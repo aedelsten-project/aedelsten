@@ -1,0 +1,18 @@
+[package]
+name = "mmd"
+version.workspace = true
+edition = "2021"
+authors.workspace = true
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+arrays  = { path = "../arrays" }
+basis  = { path = "../basis" }
+cart2sph  = { path = "../cart2sph" }
+constants  = { path = "../constants" }
+math_utilities  = { path = "../math_utilities" }
+
+[features]
+unchecked = []

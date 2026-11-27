@@ -1,0 +1,45 @@
+version = 1
+
+# Files that cannot carry a header comment: this library's own documentation, build metadata and test data.
+[[annotations]]
+path = [
+    "README.md",
+    "CHANGELOG.md",
+    "CITATION.bib",
+    ".zenodo.json",
+    "**/Cargo.toml",
+    ".gitignore",
+    ".cargo/**",
+    "cbindgen.toml",
+    "REUSE.toml",
+    "test_fixtures/**",
+    "src/basis/data/cc-pVDZ-2",
+]
+SPDX-FileCopyrightText = "2024 Ernst D. Larsson"
+SPDX-License-Identifier = "MIT"
+
+# libmsym (https://github.com/mcodev31/libmsym), vendored unmodified.
+[[annotations]]
+path = "src/symmetry/src/libmsym/**"
+precedence = "override"
+SPDX-FileCopyrightText = "2015 Marcus Johansson"
+SPDX-License-Identifier = "MIT"
+
+# Basis sets from the Basis Set Exchange (https://www.basissetexchange.org), Molcas library format; and its SAP fits
+# (sap_grasp_large, sap_helfem_large) as plain exponent and charge lists.
+[[annotations]]
+path = ["src/basis/data/STO-3G", "src/basis/data/cc-pVDZ", "src/basis/data/X2C-QZVPPall", "src/basis/data/X2C-SVPall", "src/basis/data/SAP-GRASP", "src/basis/data/SAP-HELFEM"]
+SPDX-FileCopyrightText = "2020 The Molecular Sciences Software Institute, Virginia Tech"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+# The ANO-RCC basis library and the embedding AIMP libraries, from OpenMolcas (https://gitlab.com/Molcas/OpenMolcas).
+[[annotations]]
+path = ["src/basis/data/ANO-RCC", "src/basis/data/ANO-RCC.aliases"]
+SPDX-FileCopyrightText = "The OpenMolcas authors"
+SPDX-License-Identifier = "LGPL-2.1-only"
+
+# Converted from Dalton's pehf_1pa test (https://gitlab.com/dalton/dalton): its acrolein geometry and PElib potential.
+[[annotations]]
+path = "test_fixtures/pehf_1pa/**"
+SPDX-FileCopyrightText = "The Dalton authors"
+SPDX-License-Identifier = "LGPL-2.1-only"

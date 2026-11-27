@@ -1,0 +1,13 @@
+[package]
+name = "sources"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+math_utilities = { path = "../math_utilities" }
+arrays = { path = "../arrays" }
+
+[dev-dependencies]
+cart2sph = { path = "../cart2sph" }

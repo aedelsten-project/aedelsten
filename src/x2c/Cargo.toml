@@ -1,0 +1,11 @@
+[package]
+name = "x2c"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+arrays  = { path = "../arrays" }
+basis  = { path = "../basis" }
+oneint  = { path = "../oneint" }

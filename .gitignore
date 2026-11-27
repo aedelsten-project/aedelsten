@@ -1,0 +1,6 @@
+/target
+/target-*/
+/lib
+/Cargo.lock
+/MEMORY_NOTES.md
+__pycache__/

@@ -1,0 +1,19 @@
+Basis set
+    O.x2c-SVPall
+    O1 0.0 0.0 0.2217
+End of Basis
+Basis set
+    H.x2c-SVPall
+    H1 0.0 1.4309 -0.8867
+    H2 0.0 -1.4309 -0.8867
+End of Basis
+Basis set
+    Mg.TEST-EMB-AIMP.Larsson.0s.0s.ECP.MgO
+    orthogonality
+    Na1 2.5 -1.0 3.0
+End of Basis
+Basis set
+    O.TEST-EMB-AIMP.Larsson.0s.0s.ECP.MgO
+    F1 -3.0 0.5 1.0
+    F2 0.5 4.0 -2.5
+End of Basis

@@ -1,0 +1,12 @@
+Basis set
+    H.x2c-SVPall
+    H1 0.37 -1.82 0.94
+End of Basis
+Basis set
+    H.x2c-SVPall
+    H2 2.15 0.68 -1.41
+End of Basis
+Basis set
+    Mg.TEST-EMB-AIMP.Larsson.0s.0s.ECP.MgO
+    Na1 -1.63 2.07 3.28
+End of Basis

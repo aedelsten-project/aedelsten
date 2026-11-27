@@ -1,0 +1,84 @@
+[workspace]
+members = ["src/aedelsten_mpi",
+			  "src/aimp",
+			  "src/amfi",
+			  "src/arrays",
+			  "src/basis",
+			  "src/cart2sph",
+			  "src/complex",
+			  "src/constants",
+			  "src/efield",
+			  "src/eri", "src/fock_constructors",
+			  "src/instrumentation",
+			  "src/math_utilities",
+			  "src/mmd",
+			  "src/oneint",
+			  "src/polarization",
+			  "src/sources",
+			  "src/symmetry",
+			  "src/x2c",
+			  "xtask"
+]
+
+# One version for every crate of the workspace (the library and its foundation crates alike), so that a consumer's
+# version requirement holds for each crate it takes; a release is tagged v<version>.
+[workspace.package]
+version = "0.5.0"
+authors = ["Ernst D. Larsson <ernst.d.larsson@gmail.com>"]
+license = "MIT"
+
+[package]
+name = "aedelsten"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+rust-version = "1.88"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+aedelsten_mpi = { path = "./src/aedelsten_mpi" }
+aimp   = { path = "./src/aimp" }
+amfi = { path = "./src/amfi" }
+arrays   = { path = "./src/arrays" }
+basis    = { path = "./src/basis" }
+cart2sph   = { path = "./src/cart2sph" }
+constants = { path = "./src/constants" }
+efield = { path = "./src/efield" }
+eri = { path = "./src/eri" }
+fock_constructors = { path = "./src/fock_constructors" }
+instrumentation = { path = "./src/instrumentation" }
+math_utilities   = { path = "./src/math_utilities" }
+mmd = { path = "./src/mmd" }
+oneint = { path = "./src/oneint" }
+polarization = { path = "./src/polarization" }
+sources = { path = "./src/sources" }
+symmetry = { path = "./src/symmetry" }
+x2c = { path = "./src/x2c" }
+
+[features]
+unchecked-arrays = ["arrays/unchecked", "mmd/unchecked", "eri/unchecked"]
+# The fine timing layer (src/instrumentation's fine_span: per shell-quartet batch, per digest call), compiled out
+# when off. The coarse layer (per walk, per allreduce) is always on -- see src/instrumentation's own doc comment.
+profile = ["eri/profile", "oneint/profile", "fock_constructors/profile", "instrumentation/profile"]
+# Off by default -- see src/aedelsten_mpi's own doc comment. Forwarded down to
+# every crate that has parallelized a loop via aedelsten_mpi (oneint's one-electron
+# integral loops, aimp's AIMP exchange-contribution site loop, and eri/fock_constructors'
+# direct-Fock shell-pair-quartet loop -- see eri::TensorChoice::wants_mpi_partition).
+mpi = ["oneint/mpi", "aimp/mpi", "eri/mpi", "fock_constructors/mpi", "aedelsten_mpi/mpi"]
+# BLAS selection, passed down to arrays (see its build.rs). Off by default: Accelerate on
+# macOS, system BLAS/OpenBLAS on Linux. Choose at most one.
+openblas = ["arrays/openblas"]
+mkl = ["arrays/mkl"]
+system-blas = ["arrays/system-blas"]
+
+[profile.release]
+# One codegen unit: timings stop depending on how unrelated modules happen to be partitioned (2-3 % seen).
+codegen-units = 1
+
+[profile.test]
+# The kernels unoptimized made the suite take 21 minutes; at opt-level 1 it takes 1.5, a kernel edit rebuilding in
+# 167 s instead of 41 (opt-level 2: 44 s and 452 s). Debug assertions and overflow checks stay on.
+opt-level = 1

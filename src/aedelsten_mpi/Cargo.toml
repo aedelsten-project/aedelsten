@@ -1,0 +1,18 @@
+[package]
+name = "aedelsten_mpi"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+instrumentation = { path = "../instrumentation" }
+
+[build-dependencies]
+cc = { version = "1", optional = true }
+
+[features]
+default = []
+# MPI: the C shim (src/shim.c) compiled and linked, which needs an mpicc-compatible compiler wrapper on PATH (or
+# named by MPICC) at build time. Without it every function works as the one-rank case.
+mpi = ["dep:cc"]

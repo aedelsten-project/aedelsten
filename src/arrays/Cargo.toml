@@ -1,0 +1,18 @@
+[package]
+name = "arrays"
+version.workspace = true
+edition = "2021"
+authors.workspace = true
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[features]
+# Element access without bounds checks (debug builds still check every index).
+unchecked = []
+# BLAS/LAPACK selection (see build.rs). None of them: Accelerate on macOS, the system BLAS elsewhere.
+openblas = []
+mkl = []
+system-blas = []

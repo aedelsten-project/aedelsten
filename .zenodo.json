@@ -1,0 +1,16 @@
+{
+  "title": "Ädelsten: a library of molecular integrals over Gaussian basis functions",
+  "upload_type": "software",
+  "description": "Ädelsten is a library of molecular integrals over Gaussian basis functions, written in Rust and callable from Rust, C, Fortran, Python and Julia. It computes the integrals and the single operations built directly on them (one-electron integrals, stored and integral-direct two-electron integrals and J and K builds, full-range and range-separated, their geometric first derivatives, the spin-free X2C Hamiltonian and spin-orbit integrals, embedding by point multipoles, ab initio model potentials and polarizable sites, point-group symmetry), with MPI parallelism; a host program assembles its Fock matrices, Hamiltonians and energies from them. Part of the Ädelsten project.",
+  "creators": [
+    {"name": "Larsson, Ernst D.", "orcid": "0000-0001-7655-2993"}
+  ],
+  "contributors": [
+    {"name": "Claude (Anthropic)", "type": "Other"}
+  ],
+  "license": "MIT",
+  "keywords": ["molecular integrals", "Gaussian basis functions", "electron repulsion integrals", "integral derivatives", "X2C", "embedding", "ab initio model potentials", "quantum chemistry", "Rust"],
+  "related_identifiers": [
+    {"identifier": "https://gitlab.com/aedelsten/aedelsten", "relation": "isIdenticalTo", "scheme": "url"}
+  ]
+}

@@ -1,0 +1,12 @@
+[alias]
+install-aedelsten = "run --package xtask --"
+
+# The tests' library files (TEST-CORE-AIMP), outside the bundled library: found through AEDELSTEN_BASIS_LIBRARY.
+[env]
+AEDELSTEN_BASIS_LIBRARY = { value = "test_fixtures/basis", relative = true }
+
+# Code generation for the CPU that builds, so the kernels use its vector instructions (AVX2/FMA on x86-64): the binary
+# then runs on that CPU type only, so build on the machine (or a node of the partition) that runs it. A RUSTFLAGS set
+# in the environment replaces this entirely.
+[build]
+rustflags = ["-C", "target-cpu=native"]

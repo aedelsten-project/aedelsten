@@ -1,0 +1,9 @@
+[package]
+name = "xtask"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+cbindgen = "0.29.4"

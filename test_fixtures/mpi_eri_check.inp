@@ -1,0 +1,9 @@
+Basis set
+    O.x2c-SVPall
+    O1 0.0 0.0 0.1
+End of Basis
+Basis set
+    H.x2c-SVPall
+    H1 0.0 1.4 -0.9
+    H2 0.0 -1.4 -0.9
+End of Basis

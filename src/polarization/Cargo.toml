@@ -1,0 +1,11 @@
+[package]
+name = "polarization"
+version.workspace = true
+edition = "2024"
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+arrays         = { path = "../arrays" }
+math_utilities = { path = "../math_utilities" }
+sources        = { path = "../sources" }

@@ -1,0 +1,26 @@
+[package]
+name = "oneint"
+version.workspace = true
+edition = "2021"
+authors.workspace = true
+license.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+aedelsten_mpi = { path = "../aedelsten_mpi" }
+arrays   = { path = "../arrays" }
+basis = { path = "../basis" }
+cart2sph = { path = "../cart2sph" }
+constants = { path = "../constants" }
+instrumentation = { path = "../instrumentation" }
+mmd      = { path = "../mmd" }
+math_utilities = { path = "../math_utilities" }
+
+[features]
+# Forwarded straight through to aedelsten_mpi: off by default (pure Rust, no MPI
+# toolchain required), and compiles/links real MPI when enabled.
+mpi = ["aedelsten_mpi/mpi"]
+# The fine timing layer (per shell pair: primitives, contraction and transformation, distribution); the coarse one
+# (per operator call, per allreduce) is always on. See src/instrumentation.
+profile = ["instrumentation/profile"]
